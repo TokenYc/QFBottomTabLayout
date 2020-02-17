@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 0, 0,
                 R.mipmap.tab3_selected, 0, 0};
 
-        String[] mTitles = {"首页", "社区", "", "消息", "发现"};
+        String[] mTitles = {"首页", "社区", "中间", "消息", "发现"};
         ArrayList<QFTabEntity> list8 = new ArrayList<>();
         for (int i = 0; i < mTitles.length; i++) {
             list8.add(new TabEntity(mTitles[i], mIconSelectIds[i], mIconUnselectIds[i]));

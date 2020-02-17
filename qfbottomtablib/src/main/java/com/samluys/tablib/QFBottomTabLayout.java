@@ -337,7 +337,7 @@ public class QFBottomTabLayout extends FrameLayout {
                 if (mIconVisible) {
                     iv_tab_icon.setVisibility(VISIBLE);
                 }
-                if (mtextVisible) {
+                if (mtextVisible && !mTabEntitys.get(i).getIsPublish()) {
                     tv_tab_title.setVisibility(VISIBLE);
                 }
             }

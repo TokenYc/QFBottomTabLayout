@@ -262,7 +262,7 @@ public class QFBottomTabLayout extends FrameLayout {
 
     private void updateTabStyles() {
         for (int i = 0; i < mTabCount; i++) {
-            View tabView = mTabsContainer.getChildAt(i);
+            final View tabView = mTabsContainer.getChildAt(i);
             tabView.setPadding((int) mTabPadding, 0, (int) mTabPadding, 0);
             TextView tv_tab_title = tabView.findViewById(R.id.tv_tab_title);
 
@@ -319,7 +319,7 @@ public class QFBottomTabLayout extends FrameLayout {
                                             LinearLayout.LayoutParams.WRAP_CONTENT);
                                 } else {
                                     int bottomMargin = dp2px(4);
-                                    lp = new LinearLayout.LayoutParams(drawableWidth - bottomMargin, drawableHeight - bottomMargin);
+                                    lp = new LinearLayout.LayoutParams(tabView.getWidth(), tabView.getHeight() - bottomMargin);
                                     lp.bottomMargin = bottomMargin;
                                 }
                             } else {

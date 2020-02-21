@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<QFTabEntity> list3 = new ArrayList<>();
         for (int i = 0; i < mTitles.length - 1; i++) {
             if (i == 2) {
-                list3.add(new TabEntity("", R.mipmap.icon_center_publish, R.mipmap.icon_center_publish, 0, true));
+                list3.add(new TabEntity("", R.mipmap.test, R.mipmap.test, 0, true));
             } else {
                 list3.add(new TabEntity(mTitles[i], mIconSelectIds[i], mIconUnselectIds[i]));
             }

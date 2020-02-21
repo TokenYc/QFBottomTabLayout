@@ -266,10 +266,10 @@ public class QFBottomTabLayout extends FrameLayout {
             tabView.setPadding((int) mTabPadding, 0, (int) mTabPadding, 0);
             TextView tv_tab_title = tabView.findViewById(R.id.tv_tab_title);
 
-            FrameLayout rl_tab = tabView.findViewById(R.id.rl_tab);
+            final FrameLayout rl_tab = tabView.findViewById(R.id.rl_tab);
             rl_tab.setBackgroundColor(mBackgroundColor);
 
-            if (mtextVisible) {
+            if (mtextVisible && !mTabEntitys.get(i).getIsPublish()) {
                 if (!TextUtils.isEmpty(tv_tab_title.getText().toString())) {
                     tv_tab_title.setVisibility(VISIBLE);
                 }
@@ -294,7 +294,7 @@ public class QFBottomTabLayout extends FrameLayout {
                 tv_tab_title.setVisibility(GONE);
             }
 
-            ImageView iv_tab_icon = tabView.findViewById(R.id.iv_tab_icon);
+            final ImageView iv_tab_icon = tabView.findViewById(R.id.iv_tab_icon);
 
             ImageView publish = tabView.findViewById(R.id.publish);
 
@@ -302,21 +302,42 @@ public class QFBottomTabLayout extends FrameLayout {
             // 显示图片
             if (mIconVisible) {
                 iv_tab_icon.setVisibility(View.VISIBLE);
-                QFTabEntity tabEntity = mTabEntitys.get(i);
+                final QFTabEntity tabEntity = mTabEntitys.get(i);
                 // 设置Tab的图片 选择和未选择
                 setTabIcon(i, i == mCurrentTab, iv_tab_icon, tabEntity);
-                LinearLayout.LayoutParams lp;
                 if (mTabEntitys.get(i).getIsPublish()) {
-                    lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    tabView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Drawable drawable = ContextCompat.getDrawable(mContext, tabEntity.getTabSelectedIcon());
+                            LinearLayout.LayoutParams lp;
+                            if (drawable != null) {
+                                int drawableWidth = drawable.getIntrinsicWidth();
+                                int drawableHeight = drawable.getIntrinsicHeight();
+                                if (drawableHeight <= rl_tab.getHeight()) {
+                                    lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                                } else {
+                                    int bottomMargin = dp2px(4);
+                                    lp = new LinearLayout.LayoutParams(drawableWidth - bottomMargin, drawableHeight - bottomMargin);
+                                    lp.bottomMargin = bottomMargin;
+                                }
+                            } else {
+                                lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                            }
+                            iv_tab_icon.setLayoutParams(lp);
+                        }
+                    });
                 } else {
+                    LinearLayout.LayoutParams lp;
                     lp = new LinearLayout.LayoutParams(
                             mIconWidth <= 0 ? LinearLayout.LayoutParams.WRAP_CONTENT : (int) mIconWidth,
                             mIconHeight <= 0 ? LinearLayout.LayoutParams.WRAP_CONTENT : (int) mIconHeight);
                     lp.bottomMargin = (int) mIconMargin;
+                    iv_tab_icon.setLayoutParams(lp);
                 }
 
-                iv_tab_icon.setLayoutParams(lp);
             } else {
                 // 纯文字显示情况
                 if (mTabEntitys.get(i).getIsPublish()) {
@@ -376,7 +397,7 @@ public class QFBottomTabLayout extends FrameLayout {
                 if (mIconVisible) {
                     iv_tab_icon.setVisibility(VISIBLE);
                 }
-                if (mtextVisible) {
+                if (mtextVisible && !mTabEntitys.get(i).getIsPublish()) {
                     tab_title.setVisibility(VISIBLE);
                 }
             }

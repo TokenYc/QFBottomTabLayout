@@ -309,7 +309,7 @@ public class QFBottomTabLayout extends FrameLayout {
                     tabView.post(new Runnable() {
                         @Override
                         public void run() {
-                            Drawable drawable = ContextCompat.getDrawable(mContext, tabEntity.getTabSelectedIcon());
+                            Drawable drawable = getTabIconDrawable(tabEntity, true);
                             LinearLayout.LayoutParams lp;
                             if (drawable != null) {
                                 int drawableWidth = drawable.getIntrinsicWidth();

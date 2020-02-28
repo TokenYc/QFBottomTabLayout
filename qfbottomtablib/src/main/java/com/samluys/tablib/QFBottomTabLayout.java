@@ -318,9 +318,7 @@ public class QFBottomTabLayout extends FrameLayout {
                                     lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                             LinearLayout.LayoutParams.WRAP_CONTENT);
                                 } else {
-                                    int bottomMargin = dp2px(4);
-                                    lp = new LinearLayout.LayoutParams(tabView.getWidth(), tabView.getHeight() - bottomMargin);
-                                    lp.bottomMargin = bottomMargin;
+                                    lp = new LinearLayout.LayoutParams(tabView.getWidth(), tabView.getHeight());
                                 }
                             } else {
                                 lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,

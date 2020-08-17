@@ -7,11 +7,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.ColorInt;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -23,6 +18,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import java.util.ArrayList;
 
@@ -35,24 +36,21 @@ import java.util.ArrayList;
  */
 public class QFBottomTabLayout extends FrameLayout {
 
-    private Context mContext;
-    private ArrayList<QFTabEntity> mTabEntitys = new ArrayList<>();
-    private LinearLayout mTabsContainer;
-    private int mCurrentTab;
-    private int mTabCount;
-
-
-    private float mTabPadding;
-    private boolean mTabSpaceEqual;
-    private float mTabWidth;
-    private int mBackgroundColor;
-
     /**
      * title
      */
     private static final int TEXT_BOLD_NONE = 0;
     private static final int TEXT_BOLD_WHEN_SELECT = 1;
     private static final int TEXT_BOLD_BOTH = 2;
+    private Context mContext;
+    private ArrayList<QFTabEntity> mTabEntitys = new ArrayList<>();
+    private LinearLayout mTabsContainer;
+    private int mCurrentTab;
+    private int mTabCount;
+    private float mTabPadding;
+    private boolean mTabSpaceEqual;
+    private float mTabWidth;
+    private int mBackgroundColor;
     private float mTextsize;
     private int mTextSelectColor;
     private int mTextUnselectColor;
@@ -76,6 +74,9 @@ public class QFBottomTabLayout extends FrameLayout {
      * 主题色
      */
     private int mThemeColor;
+    private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private SparseArray<Boolean> mInitSetMap = new SparseArray<>();
+    private OnTabSelectListener mListener;
 
     public QFBottomTabLayout(Context context) {
         this(context, null, 0);
@@ -110,6 +111,14 @@ public class QFBottomTabLayout extends FrameLayout {
             mHeight = a.getDimensionPixelSize(0, ViewGroup.LayoutParams.WRAP_CONTENT);
             a.recycle();
         }
+    }
+
+    public static Drawable getTintDrawable(Drawable drawable, @ColorInt int color) {
+        Drawable.ConstantState state = drawable.getConstantState();
+        Drawable drawable1 = DrawableCompat.wrap(state == null ? drawable : state.newDrawable()).mutate();
+        drawable1.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        DrawableCompat.setTint(drawable1, color);
+        return drawable1;
     }
 
     private void obtainAttributes(Context context, AttributeSet attrs) {
@@ -192,7 +201,7 @@ public class QFBottomTabLayout extends FrameLayout {
         ImageView iv_tab_icon = tabView.findViewById(R.id.iv_tab_icon);
         iv_tab_icon.setImageDrawable(getTabIconDrawable(mTabEntitys.get(position), false));
         iv_tab_icon.setImageResource(mTabEntitys.get(position).getTabUnselectedIcon());
-        FrameLayout rl_tab = tabView.findViewById(R.id.rl_tab);
+        ConstraintLayout rl_tab = tabView.findViewById(R.id.rl_tab);
         rl_tab.setBackgroundColor(mBackgroundColor);
 
         tabView.setOnClickListener(new OnClickListener() {
@@ -266,7 +275,7 @@ public class QFBottomTabLayout extends FrameLayout {
             tabView.setPadding((int) mTabPadding, 0, (int) mTabPadding, 0);
             TextView tv_tab_title = tabView.findViewById(R.id.tv_tab_title);
 
-            final FrameLayout rl_tab = tabView.findViewById(R.id.rl_tab);
+            final ConstraintLayout rl_tab = tabView.findViewById(R.id.rl_tab);
             rl_tab.setBackgroundColor(mBackgroundColor);
 
             if (mtextVisible && !mTabEntitys.get(i).getIsPublish()) {
@@ -458,23 +467,6 @@ public class QFBottomTabLayout extends FrameLayout {
         }
     }
 
-    //setter and getter
-    public void setCurrentTab(int currentTab) {
-        if (mListener == null || !mListener.shouldInterceptJumpFragment(currentTab)) {
-            this.mCurrentTab = currentTab;
-            updateTabSelection(currentTab);
-            if (mFragmentChangeManager != null) {
-                int tempCurrentTab = getFragmentIndex(mCurrentTab);
-                if (mFragmentChangeManager.getCurrentFragment(tempCurrentTab).isAdded()) {
-                    mFragmentChangeManager.showCurrentFragment(tempCurrentTab);
-                } else {
-                    mFragmentChangeManager.setFragments(tempCurrentTab);
-                }
-            }
-            invalidate();
-        }
-    }
-
     /**
      * 根据当前tab获取
      *
@@ -503,71 +495,10 @@ public class QFBottomTabLayout extends FrameLayout {
         return mFragmentChangeManager;
     }
 
-    public void setTabPadding(float tabPadding) {
-        this.mTabPadding = dp2px(tabPadding);
-        updateTabStyles();
-    }
-
-    public void setTabSpaceEqual(boolean tabSpaceEqual) {
-        this.mTabSpaceEqual = tabSpaceEqual;
-        updateTabStyles();
-    }
-
-    public void setTabWidth(float tabWidth) {
-        this.mTabWidth = dp2px(tabWidth);
-        updateTabStyles();
-    }
-
-    public void setTextsize(float textsize) {
-        this.mTextsize = sp2px(textsize);
-        updateTabStyles();
-    }
-
-    public void setTextSelectColor(int textSelectColor) {
-        this.mTextSelectColor = textSelectColor;
-        updateTabStyles();
-    }
-
-    public void setTextUnselectColor(int textUnselectColor) {
-        this.mTextUnselectColor = textUnselectColor;
-        updateTabStyles();
-    }
-
-    public void setTextBold(int textBold) {
-        this.mTextBold = textBold;
-        updateTabStyles();
-    }
-
-    public void setIconVisible(boolean iconVisible) {
-        this.mIconVisible = iconVisible;
-        updateTabStyles();
-    }
-
-    public void setIconWidth(float iconWidth) {
-        this.mIconWidth = dp2px(iconWidth);
-        updateTabStyles();
-    }
-
-    public void setIconHeight(float iconHeight) {
-        this.mIconHeight = dp2px(iconHeight);
-        updateTabStyles();
-    }
-
-    public void setIconMargin(float iconMargin) {
-        this.mIconMargin = dp2px(iconMargin);
-        updateTabStyles();
-    }
-
-    public void setTextAllCaps(boolean textAllCaps) {
-        this.mTextAllCaps = textAllCaps;
-        updateTabStyles();
-    }
-
     public void setBackgroundColor(int backgroundColor) {
         this.mBackgroundColor = backgroundColor;
         updateTabStyles();
     }
-
 
     public void setTextVisible(boolean textVisible) {
         this.mtextVisible = textVisible;
@@ -592,54 +523,130 @@ public class QFBottomTabLayout extends FrameLayout {
         return mCurrentTab;
     }
 
+    //setter and getter
+    public void setCurrentTab(int currentTab) {
+        if (mListener == null || !mListener.shouldInterceptJumpFragment(currentTab)) {
+            this.mCurrentTab = currentTab;
+            updateTabSelection(currentTab);
+            if (mFragmentChangeManager != null) {
+                int tempCurrentTab = getFragmentIndex(mCurrentTab);
+                if (mFragmentChangeManager.getCurrentFragment(tempCurrentTab).isAdded()) {
+                    mFragmentChangeManager.showCurrentFragment(tempCurrentTab);
+                } else {
+                    mFragmentChangeManager.setFragments(tempCurrentTab);
+                }
+            }
+            invalidate();
+        }
+    }
+
     public float getTabPadding() {
         return mTabPadding;
+    }
+
+    public void setTabPadding(float tabPadding) {
+        this.mTabPadding = dp2px(tabPadding);
+        updateTabStyles();
     }
 
     public boolean isTabSpaceEqual() {
         return mTabSpaceEqual;
     }
 
+    public void setTabSpaceEqual(boolean tabSpaceEqual) {
+        this.mTabSpaceEqual = tabSpaceEqual;
+        updateTabStyles();
+    }
+
     public float getTabWidth() {
         return mTabWidth;
+    }
+
+    public void setTabWidth(float tabWidth) {
+        this.mTabWidth = dp2px(tabWidth);
+        updateTabStyles();
     }
 
     public float getTextsize() {
         return mTextsize;
     }
 
+    public void setTextsize(float textsize) {
+        this.mTextsize = sp2px(textsize);
+        updateTabStyles();
+    }
+
     public int getTextSelectColor() {
         return mTextSelectColor;
+    }
+
+    public void setTextSelectColor(int textSelectColor) {
+        this.mTextSelectColor = textSelectColor;
+        updateTabStyles();
     }
 
     public int getTextUnselectColor() {
         return mTextUnselectColor;
     }
 
+    public void setTextUnselectColor(int textUnselectColor) {
+        this.mTextUnselectColor = textUnselectColor;
+        updateTabStyles();
+    }
+
     public int getTextBold() {
         return mTextBold;
+    }
+
+    public void setTextBold(int textBold) {
+        this.mTextBold = textBold;
+        updateTabStyles();
     }
 
     public boolean isTextAllCaps() {
         return mTextAllCaps;
     }
 
+    public void setTextAllCaps(boolean textAllCaps) {
+        this.mTextAllCaps = textAllCaps;
+        updateTabStyles();
+    }
+
     public float getIconWidth() {
         return mIconWidth;
+    }
+
+    public void setIconWidth(float iconWidth) {
+        this.mIconWidth = dp2px(iconWidth);
+        updateTabStyles();
     }
 
     public float getIconHeight() {
         return mIconHeight;
     }
 
+    public void setIconHeight(float iconHeight) {
+        this.mIconHeight = dp2px(iconHeight);
+        updateTabStyles();
+    }
+
     public float getIconMargin() {
         return mIconMargin;
+    }
+
+    public void setIconMargin(float iconMargin) {
+        this.mIconMargin = dp2px(iconMargin);
+        updateTabStyles();
     }
 
     public boolean isIconVisible() {
         return mIconVisible;
     }
 
+    public void setIconVisible(boolean iconVisible) {
+        this.mIconVisible = iconVisible;
+        updateTabStyles();
+    }
 
     public ImageView getIconView(int tab) {
         View tabView = mTabsContainer.getChildAt(tab);
@@ -652,9 +659,6 @@ public class QFBottomTabLayout extends FrameLayout {
         TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
         return tv_tab_title;
     }
-
-    private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private SparseArray<Boolean> mInitSetMap = new SparseArray<>();
 
     /**
      * 显示未读消息
@@ -718,13 +722,14 @@ public class QFBottomTabLayout extends FrameLayout {
             position = mTabCount - 1;
         }
         View tabView = mTabsContainer.getChildAt(position);
-        MsgView tipView = tabView.findViewById(R.id.rtv_msg_tip);
+        final LinearLayout ll_tab = tabView.findViewById(R.id.ll_tap);
+        final MsgView tipView = tabView.findViewById(R.id.rtv_msg_tip);
         if (tipView != null) {
             TextView tv_tab_title = tabView.findViewById(R.id.tv_tab_title);
             mTextPaint.setTextSize(mTextsize);
             float textWidth = mTextPaint.measureText(tv_tab_title.getText().toString());
             float textHeight = mTextPaint.descent() - mTextPaint.ascent();
-            MarginLayoutParams lp = (MarginLayoutParams) tipView.getLayoutParams();
+            final MarginLayoutParams lp = (MarginLayoutParams) tipView.getLayoutParams();
 
             float iconH = mIconHeight;
             float margin = 0;
@@ -749,7 +754,14 @@ public class QFBottomTabLayout extends FrameLayout {
             }
             lp.leftMargin = (int) textWidth / 2;
             lp.topMargin = mHeight > 0 ? (int) (mHeight - textHeight - iconH - margin) / 2 - dp2px(bottomPadding) : dp2px(bottomPadding);
-
+            ll_tab.post(new Runnable() {
+                @Override
+                public void run() {
+                    //这里调整一下，角标从实际内容中间线的一半开始，防止间距太远
+                    lp.leftMargin = ll_tab.getWidth() / 2;
+                    tipView.setLayoutParams(lp);
+                }
+            });
             tipView.setLayoutParams(lp);
         }
     }
@@ -766,12 +778,9 @@ public class QFBottomTabLayout extends FrameLayout {
         return tipView;
     }
 
-    private OnTabSelectListener mListener;
-
     public void setOnTabSelectListener(OnTabSelectListener listener) {
         this.mListener = listener;
     }
-
 
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -802,14 +811,6 @@ public class QFBottomTabLayout extends FrameLayout {
     protected int sp2px(float sp) {
         final float scale = this.mContext.getResources().getDisplayMetrics().scaledDensity;
         return (int) (sp * scale + 0.5f);
-    }
-
-    public static Drawable getTintDrawable(Drawable drawable, @ColorInt int color) {
-        Drawable.ConstantState state = drawable.getConstantState();
-        Drawable drawable1 = DrawableCompat.wrap(state == null ? drawable : state.newDrawable()).mutate();
-        drawable1.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        DrawableCompat.setTint(drawable1, color);
-        return drawable1;
     }
 
 }

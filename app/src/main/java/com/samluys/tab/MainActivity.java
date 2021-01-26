@@ -192,8 +192,17 @@ public class MainActivity extends AppCompatActivity {
         String[] mTitles = {"首页", "社区", "中间", "消息", "发现"};
         ArrayList<QFTabEntity> list8 = new ArrayList<>();
         for (int i = 0; i < mTitles.length; i++) {
-            list8.add(new TabEntity(mTitles[i], mIconSelectIds[i], mIconUnselectIds[i]));
+            if (i == 2) {
+                TabEntity tabEntity = new TabEntity(mTitles[i],
+                        getResources().getDrawable(R.mipmap.tab3_selected),
+                        getResources().getDrawable(R.mipmap.tab3_selected),
+                        true);
+                list8.add(tabEntity);
+            } else {
+                list8.add(new TabEntity(mTitles[i], mIconSelectIds[i], mIconUnselectIds[i]));
+            }
         }
+        mTanLayout_8.setIconVisible(false);
         mTanLayout_8.setTabData(list8);
         mTanLayout_8.setBackgroundColor(getResources().getColor(R.color.color_50d165));
     }

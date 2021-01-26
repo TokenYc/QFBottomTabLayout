@@ -308,10 +308,10 @@ public class QFBottomTabLayout extends FrameLayout {
             ImageView publish = tabView.findViewById(R.id.publish);
 
 
+            final QFTabEntity tabEntity = mTabEntitys.get(i);
             // 显示图片
             if (mIconVisible) {
                 iv_tab_icon.setVisibility(View.VISIBLE);
-                final QFTabEntity tabEntity = mTabEntitys.get(i);
                 // 设置Tab的图片 选择和未选择
                 setTabIcon(i, i == mCurrentTab, iv_tab_icon, tabEntity);
                 if (mTabEntitys.get(i).getIsPublish()) {
@@ -349,6 +349,7 @@ public class QFBottomTabLayout extends FrameLayout {
                 // 纯文字显示情况
                 if (mTabEntitys.get(i).getIsPublish()) {
                     iv_tab_icon.setVisibility(View.VISIBLE);
+                    setTabIcon(i, i == mCurrentTab, iv_tab_icon, tabEntity);
                 } else {
                     iv_tab_icon.setVisibility(View.GONE);
                 }

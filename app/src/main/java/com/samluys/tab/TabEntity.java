@@ -22,7 +22,8 @@ public class TabEntity implements QFTabEntity {
         this.unSelectedIcon = unSelectedIcon;
     }
 
-    public TabEntity(String title, Drawable selectedIconDrawable, Drawable unSelectedIconDrawable) {
+    public TabEntity(String title, Drawable selectedIconDrawable, Drawable unSelectedIconDrawable, boolean isPublish) {
+        this.isPublish = isPublish;
         this.title = title;
         this.selectedIconDrawable = selectedIconDrawable;
         this.unSelectedIconDrawable = unSelectedIconDrawable;
